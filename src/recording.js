@@ -11,19 +11,22 @@ socket.on('connect', () => {
 });
 
 const record = document.querySelector('.record');
-const stop = document.querySelector('.stop');
+// const stop = document.querySelector('.stop');
 const soundClips = document.querySelector('.sound-clips');
 const canvas = document.querySelector('.visualizer');
 const mainSection = document.querySelector('.main-controls');
 
 // disable stop button while not recording
 
-stop.disabled = true;
+// stop.disabled = true;
 
 // visualiser setup - create web audio api context and canvas
 
 let audioCtx;
 const canvasCtx = canvas.getContext('2d');
+
+let isRecording = false;
+let hasGotMedia = false;
 
 //main block for doing the audio recording
 
@@ -39,39 +42,61 @@ if (navigator.mediaDevices.getUserMedia) {
     visualize(stream);
 
     record.onclick = function () {
-      mediaRecorder.start();
-      console.log(mediaRecorder.state);
-      console.log('recorder started');
-      record.style.background = 'red';
+      if (!isRecording) {
+        mediaRecorder.start();
+        console.log(mediaRecorder.state);
+        console.log('recorder started');
 
-      stop.disabled = false;
-      record.disabled = true;
+        record.style.background = 'red';
+        record.style.color = 'white';
+        record.innerText = 'Stop Recording';
+
+        //   stop.disabled = false;
+        //   record.disabled = true;
+        isRecording = true;
+      } else {
+        mediaRecorder.stop();
+        console.log(mediaRecorder.state);
+        console.log('recorder stopped');
+
+        record.style.background = '';
+        record.style.color = 'black';
+        // mediaRecorder.requestData();
+        record.innerText = 'Start Recording';
+
+        // stop.disabled = true;
+        // record.disabled = false;
+        isRecording = false;
+      }
     };
 
-    stop.onclick = function () {
-      mediaRecorder.stop();
-      console.log(mediaRecorder.state);
-      console.log('recorder stopped');
-      record.style.background = '';
-      record.style.color = '';
-      // mediaRecorder.requestData();
+    // stop.onclick = function () {
+    //   mediaRecorder.stop();
+    //   console.log(mediaRecorder.state);
+    //   console.log('recorder stopped');
+    //   record.style.background = '';
+    //   record.style.color = '';
+    //   // mediaRecorder.requestData();
 
-      stop.disabled = true;
-      record.disabled = false;
-    };
+    //   stop.disabled = true;
+    //   record.disabled = false;
+    // };
 
     mediaRecorder.onstop = function (e) {
       console.log('data available after MediaRecorder.stop() called.');
       const clipName = Date.now() + '_recording.ogg';
       //   const clipName = prompt('Enter a name for your sound clip?','My unnamed clip');
 
-      const clipContainer = document.createElement('article');
+      const clipContainer = document.createElement('div');
       //   const clipLabel = document.createElement('p');
       const audio = document.createElement('audio');
       const sendButton = document.createElement('button');
-
+        sendButton.className = 'sendButton';
       clipContainer.classList.add('clip');
       audio.setAttribute('controls', '');
+      audio.setAttribute('controlslist', 'play timeline novolume');
+      let cl = audio.getAttribute('controlslist');
+      console.log(cl);
       sendButton.textContent = 'Send';
       //   sendButton.className = 'delete';
 
@@ -86,6 +111,9 @@ if (navigator.mediaDevices.getUserMedia) {
       clipContainer.appendChild(sendButton);
       soundClips.appendChild(clipContainer);
 
+      clipContainer.style.display = 'flex';
+      clipContainer.style.flexDirection = 'row';
+
       audio.controls = true;
       const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
       chunks = [];
@@ -95,10 +123,14 @@ if (navigator.mediaDevices.getUserMedia) {
 
       sendButton.onclick = function (e) {
         // console.log(audioURL);
-        console.log("Sending clip: ", clipName);
-        socket.emit('uploadAudio', {name: clipName, data: blob}, (resp) => {
-            console.log('Upload status: ',resp);
-        })
+        console.log('Sending clip: ', clipName);
+        socket.emit('uploadAudio', { name: clipName, data: blob }, (resp) => {
+          console.log('Upload status: ', resp);
+          if (resp.message === 'success') {
+            sendButton.innerText = 'Sent!';
+            sendButton.disabled = true;
+          }
+        });
       };
 
       //   clipLabel.onclick = function() {
