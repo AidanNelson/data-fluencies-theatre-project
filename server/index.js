@@ -79,13 +79,13 @@ async function main() {
       console.log('client disconnected: ', socket.id);
     });
 
-    socket.on("upload", (file, callback) => {
+    socket.on("uploadAudio", (file, callback) => {
       console.log('received file: ', file.name); // <Buffer 25 50 44 ...>
-  
-      // save the content to the disk, for example
+      // callback();
+      // // save the content to the disk, for example
       fs.writeFile("./server/uploads/" + file.name, file.data, (err) => {
         callback({ message: err ? "failure" : "success" });
-        console.log(err ? err : "success");
+        // console.log(err ? err : "success");
       });
     });
 

@@ -108,3 +108,4 @@ dist
 cert.pem
 key.pem
 chat.db
+server/uploads/*

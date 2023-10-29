@@ -94,8 +94,9 @@ if (navigator.mediaDevices.getUserMedia) {
       console.log('recorder stopped');
 
       sendButton.onclick = function (e) {
-        console.log(audioURL);
-        socket.emit('upload', {name: clipName, data: blob}, (resp) => {
+        // console.log(audioURL);
+        console.log("Sending clip: ", clipName);
+        socket.emit('uploadAudio', {name: clipName, data: blob}, (resp) => {
             console.log('Upload status: ',resp);
         })
       };
