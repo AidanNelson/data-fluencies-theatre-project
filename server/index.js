@@ -6,7 +6,7 @@ const http = require('http');
 // const Datastore = require('nedb');
 // const MediasoupManager = require('simple-mediasoup-peer-server');
 const fs = require('fs');
-
+const { Server } = require( "socket.io");
 // let clients = {};
 // let adminMessage = '';
 // let sceneId = null; // start at no scene
@@ -31,14 +31,17 @@ async function main() {
   // }); //creates a new one if needed
   // db.loadDatabase(); //loads the db with the data
 
-  let io = require('socket.io')();
-  io.listen(server, {
+  const io = new Server();
+
+  io.attach(server,{
     cors: {
       origin: '*',
       methods: ['GET', 'POST'],
       credentials: true,
     },
+    maxHttpBufferSize: 1e8
   });
+  // io.listen(server, );
 
   io.on('connection', (socket) => {
     console.log(
