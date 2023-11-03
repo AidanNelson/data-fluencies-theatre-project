@@ -95,6 +95,7 @@
       justify-content: center;
       margin: auto;
       margin-top: 3em;
+      margin-bottom: 3em;
     }
 
     button {
@@ -107,6 +108,11 @@
       padding: 0.25em 1em 0.25em 1em;
       background-color: #454545;
       color: white;
+    }
+
+    a {
+      text-decoration: none;
+      color: #f3f3f3;
     }
 
     button:hover {
@@ -142,7 +148,7 @@
 
     h3 {
       font-size: 1.5em;
-      margin-top: 1em;
+      margin-top: 1.5em;
     }
 
     .visualizer {
@@ -162,16 +168,21 @@
 
 <body>
   <div id="centerColumn">
-    <h3>Data Fluencies Theatre Project</h3>
+    <a href="https://websites.emerson.edu/data-fluencies/"  target="_blank" rel="noopener noreferrer" ><h3>Data Fluencies Theatre Project</h3></a>
     <h1>(Machine) Learning to Be</h1>
     <p>If you want to dance, sing, or scream out your frustrations in response to being misrepresented, ignored, judged,
       discriminated against, or erased by society, institutions, or automated/technological systems, what does that
       performance look like?</p>
     <p>Please whisper or type your response. Feel free to express it in any way that makes sense to you.</p>
 
-    <p>Your response is anonymous. No personal data is collected besides the audio or written response you submit.</p>
+    <p>Your response is anonymous. No personal data is collected besides the written or audio response you submit.</p>
 
     </p>
+    <hr />
+    <div id="text-input">
+      <input type="text" id="text-input-field" placeholder="Your response..." />
+      <button id="shareTextButton">Share Text</button>
+    </div>
     <hr />
     <div id="recorder">
       <!-- <canvas class="visualizer" height="40px"></canvas> -->
@@ -183,11 +194,8 @@
 
       </div>
     </div>
-    <hr />
-    <div id="text-input">
-      <input type="text" id="text-input-field" placeholder="Your response..." />
-      <button id="shareTextButton">Share Text</button>
-    </div>
+   
+   
 
 
   </div>
