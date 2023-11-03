@@ -3,7 +3,7 @@
 const express = require('express');
 // const https = require("https");
 const http = require('http');
-// const Datastore = require('nedb');
+const Datastore = require('nedb');
 // const MediasoupManager = require('simple-mediasoup-peer-server');
 const fs = require('fs');
 const { Server } = require( "socket.io");
@@ -25,11 +25,11 @@ async function main() {
   server.listen(port);
   console.log(`Server listening on port ${port}`);
 
-  // let db = new Datastore({
-  //   filename: 'chat.db',
-  //   timestampData: true,
-  // }); //creates a new one if needed
-  // db.loadDatabase(); //loads the db with the data
+  let db = new Datastore({
+    filename: 'text.db',
+    timestampData: true,
+  }); //creates a new one if needed
+  db.loadDatabase(); //loads the db with the data
 
   const io = new Server();
 
@@ -87,6 +87,13 @@ async function main() {
         callback({ message: err ? "failure" : "success" });
         // console.log(err ? err : "success");
       });
+    });
+
+    socket.on('uploadText', (data, callback) => {
+      console.log('received text: ', data);
+      db.insert({message: data});
+
+      callback({ message: 'success' });
     });
 
   //   socket.on('interaction', (msg) => {

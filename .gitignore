@@ -110,3 +110,4 @@ key.pem
 chat.db
 server/uploads/*
 
+text.db
