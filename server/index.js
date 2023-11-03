@@ -52,7 +52,7 @@ async function main() {
     socket.on('uploadAudio', (file, callback) => {
       console.log('received file: ', file.name); // <Buffer 25 50 44 ...>
 
-      fs.writeFile('./server/uploads/' + file.name, file.data, (err) => {
+      fs.writeFile('./uploads/' + file.name, file.data, (err) => {
         callback({ message: err ? 'failure' : 'success' });
         console.log(err ? err : "success");
       });
