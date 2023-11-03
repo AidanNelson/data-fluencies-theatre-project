@@ -1,7 +1,7 @@
 // set up basic variables for app
 let socket;
-if (window.location.hostname === 'venue.itp.io') {
-  socket = io('https://venue.itp.io');
+if (window.location.hostname === 'dftp.live') {
+  socket = io('https://dftp.live');
 } else {
   socket = io('http://localhost:3131');
 }
