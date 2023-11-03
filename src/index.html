@@ -75,6 +75,8 @@
     #centerColumn {
       max-width: 600px;
       margin: auto;
+      padding-left: 1.0em;
+      padding-right: 1.0em;
     }
 
     #recorder {
@@ -170,6 +172,15 @@
     .digital-interaction {
       background-color: lightblue;
     }
+    #disclaimer {
+      font-size: 0.75em;
+      font-weight: bold;
+      text-transform: capitalize;
+      padding-left: 2.0em;
+      padding-right: 4.0em;
+      margin-bottom: 4em;
+      margin-top: 4em;
+    }
   </style>
 </head>
 
@@ -183,7 +194,7 @@
     <p>Please whisper or type your response. Feel free to express it in any way that makes sense to you.</p>
 
     <p>Your response is anonymous. No personal data is collected besides the written or audio response you submit.</p>
-
+    <p id="disclaimer">Your response will become part of a dataset that will inform the performance, and may be used to train a machine learning model.</p>
     <hr />
     <div id="text-input">
       <input type="text" id="text-input-field" placeholder="Your response..." />
