@@ -12,11 +12,16 @@
       padding: 0px;
       overflow: hidden;
     }
-    #broadcastVideoContainer {
+    #canvasContainer {
       width: 100vw;
       height: 100vh;
       z-index: 1;
     }
+    /* #broadcastVideoContainer {
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+    } */
     #broadcastVideo {
       width: 100%;
       height: 100%;
@@ -35,6 +40,15 @@
   </style>
 
   <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+
     <div
       style="
         position: absolute;
@@ -49,6 +63,7 @@
         Enter
       </button>
     </div>
+    <div id="canvasContainer"></div>
     <iframe id="sceneContainer"></iframe>
 
     <div id="broadcastVideoContainer">
