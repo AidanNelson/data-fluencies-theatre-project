@@ -5,8 +5,12 @@ This example uses the OrbitControls addon by importing it separately from the ma
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { FlyControls } from 'three/addons/controls/FlyControls.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { Quotes } from './quotes.js';
+import { Flow } from 'three/addons/modifiers/CurveModifier.js';
 
-let scene, camera, renderer, controls;
+let scene, camera, renderer, controls, font, flow;
 let imageDisplays = [];
 let socket;
 let mediasoupPeer;
@@ -67,13 +71,76 @@ function init() {
   loop();
 
   // call our function to get and display images from an API
-  getDataAndDisplay();
+  // getDataAndDisplay();
+
+  loadFont();
 }
 
+function loadFont() {
+  const loader = new FontLoader();
+  loader.load('poppins-medium-regular-font.json', function (response) {
+    font = response;
+
+    refreshText();
+  });
+}
+
+function generatePoints() {
+  let p = [];
+
+  for (let i = 0; i < 12; i++) {
+    p.push(new THREE.Vector3(0, 0.1 * i, 0));
+  }
+  return p;
+}
+function generateHelixPoints(radius, turns, height, numPoints = 10) {
+  const points = [];
+  const initialRadius = radius;
+
+  for (let i = 0; i < numPoints; i++) {
+    const theta = (i / (numPoints - 1)) * 2 * turns * Math.PI;
+    radius = initialRadius - (initialRadius / numPoints) * i; // Decrease radius for each turn
+    const x = radius * Math.cos(theta);
+    const y = radius * Math.sin(theta);
+    const z = (i / (numPoints - 1)) * height;
+    points.push(new THREE.Vector3(x, z, y));
+  }
+
+  // let reversed = structuredClone(points).reverse();
+  // points.push(reversed);
+  return points;
+}
+let tm;
+
+function refreshText() {
+  console.log(font);
+
+  Quotes.forEach((q, i) => {
+    tm = createText(q);
+    // tm.position.set(0, 2 - i * 0.5, 0);
+    scene.add(tm);
+    tm.scale.set(2, 2, 2);
+    // tm.rotateX(-Math.PI / 2);
+    console.log(q.length);
+    const length = q.length * 0.1;
+    const depth = q.length * 0.1;
+
+    // tm.rotateX(Math.PI / 2);
+    let points = generateHelixPoints(2, length, depth, 200);
+    points = points.reverse();
+    console.log({ points });
+    const curve = new THREE.CatmullRomCurve3(points);
+    flow = new Flow(tm);
+    flow.updateCurve(0, curve);
+    flow.object3D.rotateX(-Math.PI / 2);
+
+    scene.add(flow.object3D);
+  });
+}
 // this function gets data from the API and then adds new "MyImageDisplay" objects to the scene
 // it is a special "asynchronous" function, which means it will wait for the data to be ready before continuing
 async function getDataAndDisplay() {
-  let artworkData = await getArtworkData('Brooklyn');
+  let artworkData = await getArtworkData('cat');
 
   console.log(artworkData);
 
@@ -84,18 +151,24 @@ async function getDataAndDisplay() {
       'https://www.artic.edu/iiif/2/' + image_id + '/full/843,/0/default.jpg';
 
     // then we create a new MyImageDisplay object and pass in the scene and the URL
-    let imageDisplay = new MyImageDisplay(scene, imageUrl);
+    for (let q = 0; q < 10; q++) {
+      let imageDisplay = new MyImageDisplay(scene, imageUrl);
 
-    // then we set the location of the display
-    imageDisplay.setPosition(i * 2, 0, 0); // arrange them in a line
+      // then we set the location of the display
+      imageDisplay.setPosition(i * 2, camera.position.y, q * 2); // arrange them in a line
 
-    // finally, we add the imageDisplay to an array so we can acces it in our draw loop
-    imageDisplays.push(imageDisplay);
+      // finally, we add the imageDisplay to an array so we can acces it in our draw loop
+      imageDisplays.push(imageDisplay);
+    }
   }
 }
 
 // our draw loop
 function loop() {
+  if (flow) {
+    flow.moveAlongCurve(0.00001);
+  }
+  if (tm) tm.position.x -= 0.01;
   // do something to each image display
   for (let i = 0; i < imageDisplays.length; i++) {
     imageDisplays[i].doAction(0.01);
@@ -151,7 +224,9 @@ class MyImageDisplay {
 
 window.onload = () => {
   document.getElementById('startButton').addEventListener('click', () => {
-    document.getElementById('startButton').style.display = 'none';
+    const overlay = document.getElementById('overlay');
+    overlay.classList.add('hidden');
+
     init();
   });
 };
@@ -222,7 +297,7 @@ export function getArtworkData(query) {
     let url =
       'https://api.artic.edu/api/v1/artworks/search?q=' +
       query +
-      '&query[term][is_public_domain]=true';
+      '&query[term][is_public_domain]=true&limit=20';
 
     let image_id = '47c94f35-2c05-9eb2-4c3f-6c841724a0a1';
     let imageUrl =
@@ -253,4 +328,25 @@ export function getArtworkData(query) {
         reject(error);
       });
   });
+}
+
+function createText(text) {
+  let textGeo = new TextGeometry(text, {
+    font: font,
+
+    size: 0.25,
+    height: 0.05,
+    curveSegments: 2,
+
+    bevelThickness: 0,
+    bevelSize: 0,
+    bevelEnabled: false,
+  });
+
+  let mesh = new THREE.Mesh(
+    textGeo,
+    new THREE.MeshBasicMaterial({ color: 'aliceblue' })
+  );
+
+  return mesh;
 }

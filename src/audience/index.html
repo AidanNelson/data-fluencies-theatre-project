@@ -12,16 +12,178 @@
       padding: 0px;
       overflow: hidden;
     }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-size: 100%;
+      background-color: #232323;
+      color: #f3f3f3;
+      padding: 0em;
+      margin: 0em;
+      font-family: 'Poppins', sans-serif;
+
+      width: 100vw;
+      height: 100vh;
+
+      background: linear-gradient(270deg, #650000, #170055);
+      background-size: 400% 400%;
+
+      -webkit-animation: AnimationName 11s ease infinite;
+      -moz-animation: AnimationName 11s ease infinite;
+      animation: AnimationName 11s ease infinite;
+
+      opacity: 1; /* fully opaque initially */
+      transition: opacity 1s ease; /* transition on opacity property over 1 second */
+    }
+
+    .hidden {
+      opacity: 0; /* fade out to fully transparent */
+      pointer-events: none; /* disable pointer events when hidden */
+    }
+
+    @-webkit-keyframes AnimationName {
+      0% {
+        background-position: 0% 87%;
+      }
+
+      50% {
+        background-position: 100% 14%;
+      }
+
+      100% {
+        background-position: 0% 87%;
+      }
+    }
+
+    @-moz-keyframes AnimationName {
+      0% {
+        background-position: 0% 87%;
+      }
+
+      50% {
+        background-position: 100% 14%;
+      }
+
+      100% {
+        background-position: 0% 87%;
+      }
+    }
+
+    @keyframes AnimationName {
+      0% {
+        background-position: 0% 87%;
+      }
+
+      50% {
+        background-position: 100% 14%;
+      }
+
+      100% {
+        background-position: 0% 87%;
+      }
+    }
+
+    #centerColumn {
+      max-width: 600px;
+      margin: auto;
+      padding-left: 1em;
+      padding-right: 1em;
+      text-align: center;
+    }
+
+    button {
+      width: 150px;
+      /* height: 3em; */
+      font-size: 0.8em;
+      border: 1px solid #fefefe;
+      box-shadow: 2px -2px teal;
+      /* border-radius: 5px; */
+      padding: 0.25em 1em 0.25em 1em;
+      background-color: #454545;
+      color: white;
+    }
+
+    a {
+      text-decoration: underline dotted;
+      color: #ffd9a8;
+    }
+    a:hover {
+      /* color: #000a77; */
+      color: #ffd9a8;
+
+      text-shadow: 1px 1px 3px #ffd9a8;
+    }
+
+    button:hover {
+      box-shadow: 4px -4px teal;
+      /* transition: box-shadow 5s; */
+    }
+
+    .clip {
+      margin-top: 1em;
+    }
+
+    .sendButton {
+      margin-left: 0.25em;
+      width: 150px;
+    }
+
+    #shareTextButton {
+      /* flex: 0 0 150px; */
+      margin-top: 0.5em;
+      margin-left: 0.25em;
+      text-align: center;
+    }
+
+    .sound-clips {
+      padding-top: 1em;
+    }
+
+    h1 {
+      font-weight: 700;
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
+
+    h3 {
+      font-size: 1.5em;
+      margin-top: 1.5em;
+    }
+
+    .visualizer {
+      width: 100%;
+    }
+
+    p {
+      font-size: 1em;
+      margin-bottom: 1em;
+    }
+
+    .digital-interaction {
+      background-color: lightblue;
+    }
+    #disclaimer {
+      font-size: 0.75em;
+      font-weight: bold;
+      /* text-transform: capitalize; */
+      padding-left: 2em;
+      padding-right: 4em;
+      margin-bottom: 4em;
+      margin-top: 4em;
+    }
+
     #canvasContainer {
       width: 100vw;
       height: 100vh;
       z-index: 1;
     }
     /* #broadcastVideoContainer {
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-    } */
+          width: 100vw;
+          height: 100vh;
+          z-index: 1;
+        } */
     #broadcastVideo {
       width: 100%;
       height: 100%;
@@ -49,19 +211,39 @@
       }
     </script>
 
-    <div
-      style="
-        position: absolute;
-        margin-left: 50vw;
-        top: 50vh;
-        padding: 0px;
-        transform: translateX(-50%) translateY(-50%);
-        z-index: 10;
-      "
-    >
-      <button id="startButton" style="width: 100px; height: 50px; z-index: 10">
-        Enter
-      </button>
+    <div id="overlay" class="overlay">
+      <div id="centerColumn">
+        <h1>(Machine) Learning to Be</h1>
+        <p>
+          “How can we co-exist equitably with AI?” Developed as part of the Data
+          Fluencies Theatre Project and co-created by a team of artists,
+          (Machine) Learning to Be is a hybrid, devised multimedia performance
+          that seeks to challenge established systems of control and explore
+          alternative modes of engaging with our data-filled world in ways that
+          open possibilities for more equitable futures alongside AI.
+        </p>
+        <p>
+          Online and in-person, (Machine) Learning to Be takes audiences on a
+          multi-world journey, featuring a cast of human and digital characters:
+          Shadow, Secret Hyena, Scarlet/CamGirl/DeadName, and Binary Oracle.
+          These diverse characters delve deep into the myriad facets, desires,
+          concerns, and harms surrounding AI.
+        </p>
+        <p>
+          This online portal offers an interactive experience structured as a
+          virtual scavenger hunt. You will explore virtual rooms filled with
+          clues and elements that delve into the characters’ worlds and provide
+          glimpses into the performance’s themes and creation process. [The
+          traces you choose to leave behind will serve to teach a machine
+          learning system. No identifying data is collected. ??]
+        </p>
+        <button
+          id="startButton"
+          style="width: 100px; height: 50px; z-index: 10"
+        >
+          BEGIN
+        </button>
+      </div>
     </div>
     <div id="canvasContainer"></div>
     <iframe id="sceneContainer"></iframe>
