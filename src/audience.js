@@ -9,12 +9,15 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { Quotes } from './quotes.js';
 import { Flow } from 'three/addons/modifiers/CurveModifier.js';
+import { FirstPersonControls } from './libs/FirstPersonControls.js';
 
 let scene, camera, renderer, controls, font, flow;
 let imageDisplays = [];
 let socket;
 let mediasoupPeer;
 let clock;
+
+let textDisplays = [];
 
 function init() {
   // initialize scene stuff
@@ -23,8 +26,8 @@ function init() {
   // hack to prevent issue where we've been scrolled below content...
   window.scrollTo(0, 0);
 
-  if (window.location.hostname === 'venue.itp.io') {
-    socket = io('https://venue.itp.io');
+  if (window.location.hostname === 'venue.dftp.live') {
+    socket = io('https://venue.dftp.live');
   } else {
     socket = io('http://localhost:3131');
   }
@@ -50,7 +53,7 @@ function init() {
   camera.lookAt(0, 1, 0);
 
   // the renderer will actually show the camera view within our <canvas>
-  renderer = new THREE.WebGLRenderer();
+  renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   const container = document.getElementById('canvasContainer');
   container.appendChild(renderer.domElement);
@@ -61,12 +64,13 @@ function init() {
 
   // add orbit controls
   // let controls = new OrbitControls(camera, renderer.domElement);
-  controls = new FlyControls(camera, renderer.domElement);
-  controls.movementSpeed = 1.5;
-  controls.domElement = renderer.domElement;
-  controls.rollSpeed = 0;
-  controls.autoForward = false;
-  controls.dragToLook = true;
+  // controls = new FlyControls(camera, renderer.domElement);
+  // controls.movementSpeed = 1.5;
+  // controls.domElement = renderer.domElement;
+  // controls.rollSpeed = 0;
+  // controls.autoForward = false;
+  // controls.dragToLook = true;
+  controls = new FirstPersonControls(scene, camera, renderer);
 
   loop();
 
@@ -84,14 +88,18 @@ function loadFont() {
     refreshText();
   });
 }
-
-function generatePoints() {
-  let p = [];
-
-  for (let i = 0; i < 12; i++) {
-    p.push(new THREE.Vector3(0, 0.1 * i, 0));
+function getRandomPoints(numPoints = 100, scale = 10) {
+  const points = [];
+  for (let i = 0; i < 100; i++) {
+    points.push(
+      new THREE.Vector3(
+        (Math.random() - 0.5) * scale,
+        (Math.random() - 0.5) * scale,
+        (Math.random() - 0.5) * scale
+      )
+    );
   }
-  return p;
+  return points;
 }
 function generateHelixPoints(radius, turns, height, numPoints = 10) {
   const points = [];
@@ -106,9 +114,56 @@ function generateHelixPoints(radius, turns, height, numPoints = 10) {
     points.push(new THREE.Vector3(x, z, y));
   }
 
-  // let reversed = structuredClone(points).reverse();
-  // points.push(reversed);
   return points;
+}
+
+class TextDisplay {
+  constructor(textToDisplay, font, scene,color,rootPosition, style=0) {
+    this.scene = scene;
+    let textGeo = new TextGeometry(textToDisplay, {
+      font: font,
+
+      size: 0.125,
+      height: 0.02,
+      curveSegments: 2,
+
+      bevelThickness: 0,
+      bevelSize: 0,
+      bevelEnabled: false,
+    });
+
+    let textMat = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide });
+
+    this.mesh = new THREE.Mesh(textGeo, textMat);
+    this.mesh.position.set(rootPosition.x,rootPosition.y,rootPosition.z);
+    this.scene.add(this.mesh);
+
+    // also add crazy curve display
+    this.alteredMesh = this.mesh.clone();
+
+    const length = textToDisplay.length * 0.1;
+    const depth = textToDisplay.length * 0.1;
+    let points = [];
+    if (style === 0) points = generateHelixPoints(3, length, depth, 20);
+    if (style === 1) points = getRandomPoints(200,5);
+    if (style === 2) points = getRandomPoints(50,0.5);
+    console.log(points);
+
+    const curve = new THREE.CatmullRomCurve3(points);
+    curve.curveType = 'centripetal';
+    curve.closed = true;
+
+    this.speed = Math.random() * 0.5;
+
+    this.flow = new Flow(this.alteredMesh);
+    this.flow.updateCurve(0, curve);
+
+    this.scene.add(this.flow.object3D);
+  }
+
+  update(delta){
+    this.flow.moveAlongCurve(delta * this.speed);
+  }
 }
 let tm;
 
@@ -116,25 +171,8 @@ function refreshText() {
   console.log(font);
 
   Quotes.forEach((q, i) => {
-    tm = createText(q);
-    // tm.position.set(0, 2 - i * 0.5, 0);
-    scene.add(tm);
-    tm.scale.set(2, 2, 2);
-    // tm.rotateX(-Math.PI / 2);
-    console.log(q.length);
-    const length = q.length * 0.1;
-    const depth = q.length * 0.1;
-
-    // tm.rotateX(Math.PI / 2);
-    let points = generateHelixPoints(2, length, depth, 200);
-    points = points.reverse();
-    console.log({ points });
-    const curve = new THREE.CatmullRomCurve3(points);
-    flow = new Flow(tm);
-    flow.updateCurve(0, curve);
-    flow.object3D.rotateX(-Math.PI / 2);
-
-    scene.add(flow.object3D);
+    textDisplays.push(new TextDisplay(q,font,scene, new THREE.Color(Math.random(),Math.random(),Math.random()),new THREE.Vector3(i*10,2,0),i));
+  
   });
 }
 // this function gets data from the API and then adds new "MyImageDisplay" objects to the scene
@@ -165,10 +203,12 @@ async function getDataAndDisplay() {
 
 // our draw loop
 function loop() {
-  if (flow) {
-    flow.moveAlongCurve(0.00001);
+
+  const delta = clock.getDelta();
+  for (let i = 0; i < textDisplays.length; i++){
+    textDisplays[i].update(delta / 5);
   }
-  if (tm) tm.position.x -= 0.01;
+  // if (tm) tm.position.x -= 0.01;
   // do something to each image display
   for (let i = 0; i < imageDisplays.length; i++) {
     imageDisplays[i].doAction(0.01);
@@ -176,7 +216,6 @@ function loop() {
   // finally, take a picture of the scene and show it in the <canvas>
   renderer.render(scene, camera);
 
-  const delta = clock.getDelta();
   controls.update(delta);
   // ask our window to draw the next frame when it's ready
   window.requestAnimationFrame(loop);

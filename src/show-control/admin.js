@@ -6,8 +6,8 @@ let sceneSwitcherButtons = {};
 function setup() {
   console.log('Setting up socket connection');
 
-  if (window.location.hostname === 'venue.itp.io') {
-    socket = io('https://venue.itp.io');
+  if (window.location.hostname === 'venue.dftp.live') {
+    socket = io('https://venue.dftp.live');
   } else {
     socket = io('http://localhost:3131');
   }
